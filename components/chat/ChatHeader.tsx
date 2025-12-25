@@ -4,6 +4,7 @@ import { STATUS_TEXT } from "@/constants/chat";
 interface ChatHeaderProps {
   status: ChatStatus;
   username: string;
+  onClear?: () => void;
 }
 
 /**
@@ -12,7 +13,7 @@ interface ChatHeaderProps {
  * - Current username
  * - Button to open new tab with different user
  */
-export const ChatHeader = ({ status, username }: ChatHeaderProps) => {
+export const ChatHeader = ({ status, username, onClear }: ChatHeaderProps) => {
   const getStatusDisplayText = (): string => {
     switch (status) {
       case "ready":
@@ -45,11 +46,20 @@ export const ChatHeader = ({ status, username }: ChatHeaderProps) => {
         </div>
       </div>
 
-      {/* Right side: Username and new tab button */}
+      {/* Right side: Username and action buttons */}
       <div className="flex items-center gap-2 md:gap-3 shrink-0">
         <div className="text-[10px] md:text-xs text-slate-300 hidden sm:block">
           You: {username}
         </div>
+        {onClear && status === "ready" && (
+          <button
+            onClick={onClear}
+            className="text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-200 transition-colors whitespace-nowrap"
+            title="Clear all messages"
+          >
+            Clear
+          </button>
+        )}
         <a
           href={getNewTabUrl()}
           target="_blank"

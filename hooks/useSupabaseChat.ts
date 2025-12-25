@@ -118,5 +118,32 @@ export const useSupabaseChat = () => {
     }
   };
 
-  return { messages, status, error, sendMessage };
+  /**
+   * Clear all messages from the database
+   * 
+   * @throws Error if Supabase is not configured or delete fails
+   */
+  const clearMessages = async (): Promise<void> => {
+    if (!supabase) {
+      setError(ERROR_MESSAGES.SUPABASE_NOT_AVAILABLE);
+      throw new Error(ERROR_MESSAGES.SUPABASE_NOT_AVAILABLE);
+    }
+
+    const { error: deleteError } = await supabase
+      .from(SUPABASE_CONFIG.TABLE_NAME)
+      .delete()
+      .neq("id", "00000000-0000-0000-0000-000000000000");
+
+    if (deleteError) {
+      console.error("Supabase delete error:", deleteError);
+      const errorMessage = `Clear error: ${deleteError.message}`;
+      setError(errorMessage);
+      setStatus("error");
+      throw deleteError;
+    }
+
+    setMessages([]);
+  };
+
+  return { messages, status, error, sendMessage, clearMessages };
 };

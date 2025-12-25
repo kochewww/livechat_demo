@@ -67,6 +67,12 @@ WITH CHECK (true);
 
 -- Enable Realtime for messages table
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+
+-- Allow public delete access (for Clear button)
+CREATE POLICY "Allow public delete access"
+ON public.messages
+FOR DELETE
+USING (true);
 ```
 
 3. Go to **Project Settings** → **API** and copy:

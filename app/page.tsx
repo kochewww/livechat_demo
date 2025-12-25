@@ -20,7 +20,7 @@ export default function Home() {
   const username = useUsername();
 
   // Get chat state and functions from Supabase hook
-  const { messages, status, error, sendMessage } = useSupabaseChat();
+  const { messages, status, error, sendMessage, clearMessages } = useSupabaseChat();
 
   /**
    * Handle sending a message
@@ -30,11 +30,24 @@ export default function Home() {
     await sendMessage(username, text);
   };
 
+  /**
+   * Handle clearing all messages
+   */
+  const handleClearMessages = async () => {
+    if (confirm("Are you sure you want to clear all messages?")) {
+      try {
+        await clearMessages();
+      } catch (error) {
+        console.error("Failed to clear messages:", error);
+      }
+    }
+  };
+
   return (
     <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-slate-50 flex flex-col md:items-center md:justify-center md:px-4 md:py-4">
       <div className="w-full h-full md:h-auto md:max-w-2xl md:max-h-[90vh] bg-white/10 border-0 md:border border-white/10 backdrop-blur-lg md:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         {/* Header with status and username */}
-        <ChatHeader status={status} username={username} />
+        <ChatHeader status={status} username={username} onClear={handleClearMessages} />
 
         {/* Error banner (only shown when status is error) */}
         {status === "error" && <ErrorBanner error={error} />}

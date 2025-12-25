@@ -23,9 +23,7 @@ export const ChatInput = ({ status, onSend }: ChatInputProps) => {
   const isReady = status === "ready";
   const canSend = isReady && !sending && draft.trim().length > 0;
 
-  /**
-   * Handle sending the message
-   */
+
   const handleSend = async () => {
     if (!canSend) return;
 
@@ -88,7 +86,7 @@ export const ChatInput = ({ status, onSend }: ChatInputProps) => {
   const placeholder = isReady ? PLACEHOLDERS.READY : PLACEHOLDERS.WAITING;
 
   return (
-    <div className="border-t border-white/10 bg-white/5 px-3 py-2 md:px-4 md:py-3 shrink-0">
+    <div className="border-t border-white/10 bg-white/5 px-3 py-2 md:px-4 md:py-3 shrink-0 sticky bottom-0 z-10">
       <div className="flex gap-2 items-center">
         <textarea
           ref={textareaRef}
@@ -98,7 +96,7 @@ export const ChatInput = ({ status, onSend }: ChatInputProps) => {
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={!isReady}
-          className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-3 py-2 md:py-2.5 text-sm md:text-base outline-none focus:outline-none focus:ring-2 focus:ring-indigo-400/60 focus:border-indigo-400/60 placeholder:text-slate-400 disabled:opacity-60 max-h-[120px] overflow-hidden leading-relaxed"
+          className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-3 py-2 md:py-2.5 text-base md:text-base outline-none focus:outline-none focus:ring-2 focus:ring-indigo-400/60 focus:border-indigo-400/60 placeholder:text-slate-400 disabled:opacity-60 max-h-[120px] overflow-hidden leading-relaxed"
         />
         <button
           onClick={handleSend}
