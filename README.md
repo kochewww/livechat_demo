@@ -14,9 +14,10 @@ A real-time chat application built with Next.js, Supabase, and TypeScript. Featu
 
 - Node.js 18+ 
 - Yarn 4+ (or npm)
-- Supabase account (free tier works)
 
 ## Getting Started
+
+> **Note**: This project includes demo Supabase credentials in `.env.local` for out-of-the-box setup. The app works immediately after cloning. For production use, replace with your own Supabase project credentials.
 
 ### 1. Clone the repository
 
@@ -33,7 +34,9 @@ yarn install
 npm install
 ```
 
-### 3. Set up Supabase
+### 3. (Optional) Set up your own Supabase project
+
+The project works out-of-the-box with demo credentials. To use your own Supabase project:
 
 1. Create a new project at [supabase.com](https://supabase.com)
 2. Go to **SQL Editor** and run:
@@ -70,16 +73,16 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
    - `Project URL`
    - `anon public` key
 
-### 4. Configure environment variables
+### 4. (Optional) Configure your own environment variables
 
-Create `.env.local` file in the root directory:
+If you want to use your own Supabase project, update `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_project_url_here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 ```
 
-> **Note for demo**: This project includes `.env.local` with public keys for demo purposes. In production, never commit environment files with sensitive data.
+> **Security Note**: The included `.env.local` contains demo Supabase credentials (anon/public keys). These are safe to expose as they're designed for client-side use. For production, use your own Supabase project and never commit service_role keys or other secrets.
 
 ### 5. Run the development server
 
