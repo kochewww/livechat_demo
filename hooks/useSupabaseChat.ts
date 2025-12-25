@@ -130,9 +130,9 @@ export const useSupabaseChat = () => {
     }
 
     // Delete all messages from database
-    // Using .gte() with impossible condition to delete all rows (works with RLS)
-    // This is a common pattern: delete where id >= '' (always true for UUIDs)
-    const { error: deleteError, data } = await supabase
+    // Using .gte() with date condition to delete all rows (works with RLS)
+    // This deletes all messages created after 1970-01-01 (essentially all)
+    const { error: deleteError } = await supabase
       .from(SUPABASE_CONFIG.TABLE_NAME)
       .delete()
       .gte("created_at", "1970-01-01");
