@@ -34,7 +34,7 @@ export const ChatMessages = ({
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex-1 overflow-y-auto px-3 py-3 md:px-4 md:py-4 space-y-2 md:space-y-3 min-h-0">
+    <div className="flex-1 overflow-y-auto scrollbar-thin px-3 py-3 md:px-4 md:py-4 space-y-2 md:space-y-3 min-h-0">
       {/* Loading state */}
       {isConnecting && (
         <div className="text-sm text-slate-300 text-center py-6">
