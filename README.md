@@ -69,6 +69,7 @@ WITH CHECK (true);
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 
 -- Allow public delete access (for Clear button)
+-- In Supabase Dashboard: Use expression "true" for USING clause
 CREATE POLICY "Allow public delete access"
 ON public.messages
 FOR DELETE
