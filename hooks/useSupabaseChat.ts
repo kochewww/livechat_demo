@@ -130,14 +130,12 @@ export const useSupabaseChat = () => {
     }
 
     // Delete all messages from database
-    // Using .neq() with impossible condition to delete all rows (works with RLS)
-    const { error: deleteError } = await supabase
+    // Using .gte() with impossible condition to delete all rows (works with RLS)
+    // This is a common pattern: delete where id >= '' (always true for UUIDs)
+    const { error: deleteError, data } = await supabase
       .from(SUPABASE_CONFIG.TABLE_NAME)
       .delete()
-      .neq("id", "00000000-0000-0000-0000-000000000000");
-    
-    // If delete succeeds, clear local state
-    // Real-time subscription will handle updates from other clients
+      .gte("created_at", "1970-01-01");
 
     if (deleteError) {
       console.error("Supabase delete error:", deleteError);
@@ -148,6 +146,7 @@ export const useSupabaseChat = () => {
     }
 
     // Clear local state after successful deletion
+    // Real-time subscription will handle updates from other clients
     setMessages([]);
   };
 
