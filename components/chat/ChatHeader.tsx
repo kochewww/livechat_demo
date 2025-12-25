@@ -1,19 +1,13 @@
+import { supabase } from "@/lib/supabaseClient";
 import type { ChatStatus } from "@/types/chat";
-import { STATUS_TEXT } from "@/constants/chat";
+import { STATUS_TEXT, SUPABASE_CONFIG } from "@/constants/chat";
 
 interface ChatHeaderProps {
   status: ChatStatus;
   username: string;
-  onClear?: () => void;
 }
 
-/**
- * Chat header component displaying:
- * - App title and status indicator
- * - Current username
- * - Button to open new tab with different user
- */
-export const ChatHeader = ({ status, username, onClear }: ChatHeaderProps) => {
+export const ChatHeader = ({ status, username }: ChatHeaderProps) => {
   const getStatusDisplayText = (): string => {
     switch (status) {
       case "ready":
@@ -30,9 +24,28 @@ export const ChatHeader = ({ status, username, onClear }: ChatHeaderProps) => {
     return `${window.location.origin}${window.location.pathname}`;
   };
 
+  const handleClear = async () => {
+    if (!supabase) {
+      console.error("Supabase not available");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to clear all messages?")) return;
+
+    const { error: deleteError } = await supabase
+      .from(SUPABASE_CONFIG.TABLE_NAME)
+      .delete()
+      .gte("created_at", "1970-01-01");
+
+    if (deleteError) {
+      console.error("Supabase delete error:", deleteError);
+    } else {
+      document.dispatchEvent(new CustomEvent("clearMessages"));
+    }
+  };
+
   return (
     <div className="flex items-center justify-between px-3 py-2.5 md:px-5 md:py-4 border-b border-white/10 shrink-0">
-      {/* Left side: Avatar and title */}
       <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
         <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-cyan-400 shrink-0" />
         <div className="min-w-0 flex-1">
@@ -46,14 +59,13 @@ export const ChatHeader = ({ status, username, onClear }: ChatHeaderProps) => {
         </div>
       </div>
 
-      {/* Right side: Username and action buttons */}
       <div className="flex items-center gap-2 md:gap-3 shrink-0">
         <div className="text-[10px] md:text-xs text-slate-300 hidden sm:block">
           You: {username}
         </div>
-        {onClear && status === "ready" && (
+        {status === "ready" && (
           <button
-            onClick={onClear}
+            onClick={handleClear}
             className="text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-200 transition-colors whitespace-nowrap"
             title="Clear all messages"
           >

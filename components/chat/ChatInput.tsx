@@ -1,21 +1,14 @@
 import { useRef, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import type { ChatStatus } from "@/types/chat";
-import { UI_CONFIG, PLACEHOLDERS } from "@/constants/chat";
+import { UI_CONFIG, PLACEHOLDERS, SUPABASE_CONFIG } from "@/constants/chat";
 
 interface ChatInputProps {
   status: ChatStatus;
-  onSend: (text: string) => Promise<void>;
+  username: string;
 }
 
-/**
- * Chat input component with auto-resizing textarea
- * 
- * Features:
- * - Auto-resizes textarea as user types (max 120px)
- * - Enter to send, Shift+Enter for new line
- * - Disabled when not connected
- */
-export const ChatInput = ({ status, onSend }: ChatInputProps) => {
+export const ChatInput = ({ status, username }: ChatInputProps) => {
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -23,25 +16,33 @@ export const ChatInput = ({ status, onSend }: ChatInputProps) => {
   const isReady = status === "ready";
   const canSend = isReady && !sending && draft.trim().length > 0;
 
-
   const handleSend = async () => {
-    if (!canSend) return;
+    if (!canSend || !supabase) return;
 
     setSending(true);
     try {
-      await onSend(draft);
+      const trimmedText = draft.trim();
+      const { error: insertError } = await supabase
+        .from(SUPABASE_CONFIG.TABLE_NAME)
+        .insert({
+          user: username,
+          text: trimmedText,
+        });
+
+      if (insertError) {
+        console.error("Supabase insert error:", insertError);
+        throw insertError;
+      }
+
       setDraft("");
       resetTextareaHeight();
-    } catch {
-      // Error handling is done in the parent component
+    } catch (error) {
+      console.error("Failed to send message:", error);
     } finally {
       setSending(false);
     }
   };
 
-  /**
-   * Reset textarea to initial height after sending
-   */
   const resetTextareaHeight = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -49,21 +50,13 @@ export const ChatInput = ({ status, onSend }: ChatInputProps) => {
     }
   };
 
-  /**
-   * Auto-resize textarea based on content
-   */
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDraft(e.target.value);
-    
     const textarea = e.target;
     const maxHeight = UI_CONFIG.TEXTAREA_MAX_HEIGHT;
-    
-    // Reset height to calculate new scroll height
     textarea.style.height = "auto";
     const newHeight = Math.min(textarea.scrollHeight, maxHeight);
     textarea.style.height = `${newHeight}px`;
-    
-    // Show scrollbar only when content exceeds max height
     if (textarea.scrollHeight <= maxHeight) {
       textarea.style.overflow = "hidden";
     } else {
@@ -71,11 +64,6 @@ export const ChatInput = ({ status, onSend }: ChatInputProps) => {
     }
   };
 
-  /**
-   * Handle keyboard shortcuts
-   * - Enter: send message
-   * - Shift+Enter: new line
-   */
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
