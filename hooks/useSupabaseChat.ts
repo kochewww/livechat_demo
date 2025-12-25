@@ -18,13 +18,13 @@ export const useSupabaseChat = () => {
   const [status, setStatus] = useState<ChatStatus>(
     supabase ? "connecting" : "error"
   );
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    supabase ? null : ERROR_MESSAGES.SUPABASE_NOT_CONFIGURED
+  );
 
   useEffect(() => {
     // Early return if Supabase is not configured
     if (!supabase) {
-      setStatus("error");
-      setError(ERROR_MESSAGES.SUPABASE_NOT_CONFIGURED);
       return;
     }
 
@@ -129,10 +129,15 @@ export const useSupabaseChat = () => {
       throw new Error(ERROR_MESSAGES.SUPABASE_NOT_AVAILABLE);
     }
 
+    // Delete all messages from database
+    // Using .neq() with impossible condition to delete all rows (works with RLS)
     const { error: deleteError } = await supabase
       .from(SUPABASE_CONFIG.TABLE_NAME)
       .delete()
       .neq("id", "00000000-0000-0000-0000-000000000000");
+    
+    // If delete succeeds, clear local state
+    // Real-time subscription will handle updates from other clients
 
     if (deleteError) {
       console.error("Supabase delete error:", deleteError);
@@ -142,6 +147,7 @@ export const useSupabaseChat = () => {
       throw deleteError;
     }
 
+    // Clear local state after successful deletion
     setMessages([]);
   };
 
