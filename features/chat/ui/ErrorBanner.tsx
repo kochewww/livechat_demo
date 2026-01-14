@@ -5,12 +5,7 @@ interface ErrorBannerProps {
 const DEFAULT_ERROR_MESSAGE =
   "Failed to connect to Supabase. Check .env.local and messages table.";
 
-/**
- * Error banner component
- * 
- * Displays error message in a red banner at the top of the chat
- * Only renders when error is present
- */
+
 export const ErrorBanner = ({ error }: ErrorBannerProps) => {
   if (!error) return null;
 

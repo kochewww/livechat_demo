@@ -1,13 +1,16 @@
-import { supabase } from "@/lib/supabaseClient";
-import type { ChatStatus } from "@/types/chat";
-import { STATUS_TEXT, SUPABASE_CONFIG } from "@/constants/chat";
+import { supabase } from "@/app/lib/supabaseClient";
 
-interface ChatHeaderProps {
-  status: ChatStatus;
-  username: string;
-}
+import { STATUS_TEXT, SUPABASE_CONFIG } from "@/features/chat/model/consts";
+import { useUsername } from "../model/useUsername";
+import { useChat } from "../model/ChatContext";
+import { usePathname } from "next/navigation";
 
-export const ChatHeader = ({ status, username }: ChatHeaderProps) => {
+export const ChatHeader = () => {
+  const href = usePathname();
+  const username = useUsername();
+
+  const { status } = useChat();
+
   const getStatusDisplayText = (): string => {
     switch (status) {
       case "ready":
@@ -19,31 +22,22 @@ export const ChatHeader = ({ status, username }: ChatHeaderProps) => {
     }
   };
 
-  const getNewTabUrl = (): string => {
-    if (typeof window === "undefined") return "#";
-    return `${window.location.origin}${window.location.pathname}`;
-  };
-
   const handleClear = async () => {
+    if (!confirm("Are you sure you want to clear all messages?")) return;
+
     if (!supabase) {
-      console.error("Supabase not available");
+      console.error("Supabase client is not initialized.");
       return;
     }
-
-    if (!confirm("Are you sure you want to clear all messages?")) return;
 
     const { error: deleteError } = await supabase
       .from(SUPABASE_CONFIG.TABLE_NAME)
       .delete()
-      .gte("created_at", "1970-01-01");
-
+      .not("id", "is", null);
     if (deleteError) {
       console.error("Supabase delete error:", deleteError);
-    } else {
-      document.dispatchEvent(new CustomEvent("clearMessages"));
     }
   };
-
   return (
     <div className="flex items-center justify-between px-3 py-2.5 md:px-5 md:py-4 border-b border-white/10 shrink-0">
       <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
@@ -61,7 +55,7 @@ export const ChatHeader = ({ status, username }: ChatHeaderProps) => {
 
       <div className="flex items-center gap-2 md:gap-3 shrink-0">
         <div className="text-[10px] md:text-xs text-slate-300 hidden sm:block">
-          You: {username}
+          You: {status === "ready" && username}
         </div>
         {status === "ready" && (
           <button
@@ -73,7 +67,7 @@ export const ChatHeader = ({ status, username }: ChatHeaderProps) => {
           </button>
         )}
         <a
-          href={getNewTabUrl()}
+          href={href}
           target="_blank"
           rel="noopener noreferrer"
           className="text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-1.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-400/30 text-indigo-200 transition-colors cursor-pointer inline-block whitespace-nowrap"
