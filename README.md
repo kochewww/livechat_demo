@@ -2,7 +2,7 @@
 
 A clean, production-ready demo of a **real-time chat** built with **Next.js**, **Supabase Realtime**, and a layered **Feature-Sliced Design (FSD)** architecture.
 
-The goal is to provide a lightweight, fast, and well-structured example that demonstrates engineering approach, modularity, and architectural discipline — **not just a UI toy**.
+The goal is to provide a lightweight, fast, and well-structured example that demonstrates engineering approach, modularity, and architectural discipline.
 
 ---
 
