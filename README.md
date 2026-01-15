@@ -1,161 +1,143 @@
-📦 Live Chat Demo — Real-Time Messaging with Supabase & Next.js
+# 📦 Live Chat Demo — Real-Time Messaging with Supabase & Next.js
 
-This project is a clean and production-ready demo of a real-time chat built with Next.js, Supabase Realtime, and a layered Feature-Sliced Design (FSD) architecture.
+A clean, production-ready demo of a **real-time chat** built with **Next.js**, **Supabase Realtime**, and a layered **Feature-Sliced Design (FSD)** architecture.
 
-The goal was to create a lightweight, fast, and well-structured implementation that clearly demonstrates engineering approach, modularity, and architectural discipline — not just a UI toy.
+The goal is to provide a lightweight, fast, and well-structured example that demonstrates engineering approach, modularity, and architectural discipline — **not just a UI toy**.
 
-🚀 Tech Stack
+---
 
-Next.js 14 (App Router)
+## 🚀 Tech Stack
 
-Supabase (Realtime API, Postgres)
+- **Next.js 14** (App Router)
+- **Supabase** (Realtime API, Postgres)
+- **React 18**
+- **TypeScript**
+- **Feature-Sliced Design Architecture (FSD)**
+- **CSS Modules / Tailwind** (depending on UI setup)
 
-React 18
+---
 
-TypeScript
+## 🎯 Key Features
 
-Feature-Sliced Design Architecture (FSD)
+### ✅ Realtime Messaging
 
-CSS Modules / Tailwind (optional depending on your UI setup)
+- Live message stream powered by **Supabase Realtime**
+- INSERT / DELETE events via dedicated subscriptions
+- Zero-delay UI updates
+- No polling or refresh needed
 
-🎯 Key Features
-✅ Realtime Messaging
+### ✅ Client-Side Username Generation
 
-Live message stream powered by Supabase Realtime.
+- Stable username stored via `sessionStorage`
+- Fully isolated in `model/useUsername`
 
-Insert/delete events handled through dedicated subscriptions.
+### ✅ Isolated Business Logic (Model Layer)
 
-Zero-delay UI updates without polling.
+All logic is encapsulated inside the `model` layer:
 
-✅ Client-Side Username Generation
+- Chat context (state management)
+- Username lifecycle
+- Message formatting
+- State transitions
+- Event routing for realtime updates
 
-Stable username generated once & persisted via sessionStorage.
+No “smart UI components” — UI is 100% declarative.
 
-Override via ?user= query param for debugging/testing.
+### ✅ Clean API Layer
 
-Fully isolated inside model/useUsername.
+Feature exposes a dedicated API module:
 
-✅ Isolated Business Logic
+- Manages realtime subscriptions
+- Encapsulates Supabase client
+- Exposes a small typed interface
+- **No direct DB calls in components**
 
-All application logic is encapsulated inside the model layer:
+### ✅ Atomic & Clean UI
 
-Context state management (ChatContext)
+UI components have zero side effects:
 
-Username lifecycle
+- `ChatHeader`
+- `ChatMessages`
+- `ChatMessage`
+- `ChatInput`
+- `ErrorBanner`
 
-Message formatting
+Each component renders data only — logic lives elsewhere.
 
-State transitions
+### ✅ Environment-Safe Configuration
 
-Event routing for realtime updates
+- All Supabase env variables resolved on build
+- Sensitive keys intentionally shipped for demo simplicity
+- No server dependency required
 
-No “smart UI components” — all UI relies purely on exposed model APIs.
+---
 
-✅ Clean API Layer
-
-Feature exposes a dedicated api module:
-
-Handles realtime subscriptions
-
-Encapsulates Supabase client
-
-Exposes a minimal and typed interface for the UI & model
-
-No direct DB calls inside components.
-
-✅ Atomic & Clean UI
-
-UI is completely dumb and stable:
-
-ChatHeader
-
-ChatMessages
-
-ChatMessage
-
-ChatInput
-
-ErrorBanner
-
-All components render only the data they receive — no internal side effects.
-
-✅ Environment-Safe Configuration
-
-All Supabase environment variables resolved on build.
-Sensitive keys stored locally and shipped only for demo purposes.
-
-🧱 Architecture (Feature-Sliced Design)
-
-The app follows a strict FSD structure:
+## 🧱 Architecture (Feature-Sliced Design)
 
 src/
 features/
 chat/
-api/ → supabase realtime integration
-model/ → business logic, context, hooks, types
-ui/ → presentation layer only
-lib/ → utilities
+api/ # supabase realtime integration
+model/ # context, hooks, business logic
+ui/ # pure UI components
+lib/ # utilities
 app/
-page.tsx → composition root
+page.tsx # composition root
 
-Why this architecture?
+yaml
+Copy code
+
+### Why FSD?
 
 Because it:
 
-Scales horizontally (more features → same structure)
+- Scales horizontally (add more features — same structure)
+- Separates business logic from UI
+- Eliminates prop drilling
+- Allows swapping API or UI without touching model logic
+- Makes onboarding extremely fast
 
-Separates business logic from UI
+---
 
-Eliminates prop drilling
+## ⚙️ Internal Mechanics
 
-Allows replacing API or UI without touching model logic
+### 1️⃣ Chat Context
 
-Makes codebase easy to onboard for any engineer
+Manages:
 
-⚙️ How It Works Internally
-1️⃣ ChatContext manages:
+- Connection status
+- Message history
+- Realtime event routing
+- Optional optimistic UI
 
-connection status
+### 2️⃣ Subscriptions
 
-message history
+Located in:
 
-event routing for INSERT/DELETE
+features/chat/api/chat.api.ts
 
-optimistic UI (optional)
+Each Supabase event → mapped to model callback → transforms state → UI updates via context.
 
-2️⃣ Subscriptions
+## 🏗️ Running the Project
 
-Located in chat/api/chat.api.ts:
-
-each event is mapped to a model callback
-
-model decides how state transforms
-
-UI rerenders automatically through context
-
-3️⃣ Username System
-
-model/useUsername.ts:
-
-query param override → sessionStorage → generated fallback
-
-stable across refreshes
-
-no server dependency
-
-🏗️ Running the Project
+```bash
 npm install
 npm run dev
-
-Requires:
+Requires environment variables:
 
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
-Yes, .env is pushed to production intentionally — keeps the demo trivial to launch and evaluate.
+Yes — .env is pushed to production intentionally to keep the demo trivial to launch and evaluate.
 
 🧪 Testing & Debugging
 
-Realtime events appear instantly in DevTools logs.
+Realtime events appear immediately in the console
 
-Chat can run in multiple tabs/windows to demo synchronization.
+Open multiple tabs/windows to simulate multiple users
+
+
+
+
+
+```
