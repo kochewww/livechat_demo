@@ -58,7 +58,10 @@ export function ChatContextProvider({
   useEffect(() => {
     const unsubscribe = chatApi.subscribe(
       (msg) => {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === msg.id)) return prev;
+          return [...prev, msg];
+        });
       },
       () => {
         setMessages([]);
@@ -67,6 +70,7 @@ export function ChatContextProvider({
 
     return () => {
       unsubscribe();
+      console.log("unsubscribing");
     };
   }, []);
 

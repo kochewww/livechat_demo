@@ -11,43 +11,46 @@ export const chatApi = {
       .limit(limit);
   },
 
-  subscribe(onInsert: (msg: ChatMessage) => void, onClear: () => void) {
+  subscribe(
+    onInsert: (msg: ChatMessage) => void,
+    onClear: () => void
+  ) {
     const channel = supabase.channel(SUPABASE_CONFIG.CHANNEL_NAME);
 
     channel
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
-          table: SUPABASE_CONFIG.TABLE_NAME,
+          table: SUPABASE_CONFIG.TABLE_NAME, // Listening specifically to messages table again
         },
         (payload) => {
-          onInsert(payload.new as ChatMessage);
+          console.log("[chat.api] Realtime event received:", payload);
+          if (payload.eventType === "INSERT") {
+            onInsert(payload.new as ChatMessage);
+          } else if (payload.eventType === "DELETE") {
+            // Check if it's a "delete all" (often ID is null or check logic)
+            // But here we basically just trigger a clear for any delete for simplicity as per previous logic
+            // Or better, check the change. Previous logic was just "on DELETE -> clear".
+            onClear();
+          }
         }
       )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: SUPABASE_CONFIG.TABLE_NAME,
-        },
-        () => {
-          onClear();
-        }
-      )
-      .subscribe((_status, error) => error && console.error(error));
+      .subscribe((status, error) => {
+        console.log("Supabase Realtime status:", status);
+        if (error) console.error("Supabase Realtime error:", error);
+      });
     return () => {
       supabase.removeChannel(channel);
     };
   },
 
   async sendMessage(message: Omit<ChatMessage, "id">) {
-    return supabase.from("messages").insert(message);
+    return supabase.from("messages").insert(message).select().single();
   },
 
   async clearMessages() {
-    return supabase.from("messages").delete().neq("id", 0);
+    return supabase.from("messages").delete().not("id", "is", null);
   },
 };
